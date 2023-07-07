@@ -7,6 +7,7 @@ class Sigma::Engine {
 		uint16_t m_width, m_height;
 		sf::RenderWindow* window;
 		sf::Clock clock;
+		sf::Image image;
 		Game* game;
 		Menu* menu;
 		GameData* data;

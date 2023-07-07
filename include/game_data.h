@@ -11,7 +11,8 @@ struct Sigma::GameData {
 	uint8_t sound = 128;
 	};
 	Data* data = nullptr;
-	GameData() {}
+	GameData();
 	void load_data();
 	void save_data();
+	~GameData();
 };

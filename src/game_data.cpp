@@ -5,15 +5,15 @@ void Sigma::GameData::load_data() {
 	if (!(std::filesystem::exists("data")))
 		std::filesystem::create_directory("data");
 
+	//Читаем байтов
 	std::ifstream in("data/gamedata.sigma", std::ios::binary);
 
 	data = new Data();
 	if (data != nullptr) {
 		INFO("Reading game data")
 		if (in.is_open()) {
+			//Записываем данные в структуру 
 			in.read((char*)data, sizeof(data));
-			std::cout << data->money << std::endl;
-			std::cout << data->record1 << std::endl;
 		}
 		else {
 			ERROR("Failed to read game data file data/gamedata.sigma");
@@ -28,7 +28,7 @@ void Sigma::GameData::load_data() {
 
 void Sigma::GameData::save_data() {
 	std::ofstream out("data/gamedata.sigma", std::ios::binary);
-
+	//Записываем байты
 	if (out.is_open()) {
 		INFO("Saving game data");
 		out.write((char*)data, sizeof(data));
@@ -36,4 +36,10 @@ void Sigma::GameData::save_data() {
 	}
 
 	ERROR("Failed to save game data");
+}
+
+Sigma::GameData::GameData() {}
+
+Sigma::GameData::~GameData() {
+	if (data != nullptr) delete data;
 }

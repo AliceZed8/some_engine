@@ -46,14 +46,11 @@ void Sigma::Menu::load_data() {
 	quit_button_hover.setScale(0.8f, 0.8f);
 	quit_button_hover.setPosition(215, 560);
 
-	//Размытый фон для меню
-	main_blur.loadFromFile("assets/main_blur.png");
-	main_blur_sprite.setTexture(main_blur);
 }
 
 //Рисуем менюшку
 void Sigma::Menu::draw() {
-	m_window->draw(main_blur_sprite);
+	//m_window->draw(main_blur_sprite);
 
 	if (state == State::MAIN) {
 		if (isHovered(play_button)) m_window->draw(play_button_hover);

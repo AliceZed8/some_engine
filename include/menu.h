@@ -6,9 +6,6 @@ class Sigma::Menu {
 private:
 
 	sf::Texture buttons;			//текстура с кнопками
-	sf::Texture main_blur;			// текстура размытого фона
-
-	sf::Sprite main_blur_sprite;	// спрайт размытого фона
 
 	//кнопочки
 	sf::Sprite play_button;

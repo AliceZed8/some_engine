@@ -1,33 +1,49 @@
 #pragma once
 #include "pch.h"
+#include "game_data.h"
 
 class Sigma::Game {
 	private:
-		//Текстурки
+		//ТЕКСТУРЫ
+		sf::Texture plus_texture;				//текстура +
+		sf::Texture flask_textures[3];			//текстура колб
 		sf::Texture main_texture;				//основная текстурка
 		sf::Texture backg_texture;				//текстура фона
 		sf::Texture client_textures[5];			//текстуры клиентов
 		sf::Texture element_textures[5];		//текстуры элементов
 		sf::Texture element_hover_textures[5];	//текстуры элементов при наводке
+		sf::Texture icon_textures[5];			//текстуры иконов
 		sf::Texture tigel_texture;				//тектура тигеля
 
-		//Спрайты
+		//СПРАЙТЫ
+		sf::Sprite flask_sprites[3];			//спрайты колб
 		sf::Sprite main_sprite;					//основной спрайт
 		sf::Sprite backg_sprite;				//спрайт фона
 		sf::Sprite client_sprites[5];			//спрайты клиентов
 		sf::Sprite element_sprites[5];			//спрайты элементов
 		sf::Sprite element_hover_sprites[5];	//спрайты элементов при наводке
-		sf::Sprite mini_element_sprites[5];		//спрайты мини элементов
+		sf::Sprite icon_sprites[5];				//спрайты мини элементов
 		sf::Sprite tigel_sprite;				//спрайт тигеля
-
 		sf::Sprite HoveredSprite;				//активный спрайт
 
-		sf::Mouse mouse; 
+		sf::Mouse mouse;						//Мышь
 		sf::Font font;							//Основной шрифт
 
-		//Счетчик элементов в тигеле
+
+		sf::SoundBuffer walking_sb;
+		sf::Sound walking_s;
+		sf::Clock walk_clock;
+
+
+
+		//тайм бар
+		sf::RectangleShape time_bar_hover;
+		sf::RectangleShape time_bar;
+
+		//Элементы в тигеле (массив спрайтов иконок)
 		std::vector<sf::Sprite> elements_in_tigel;
-		uint16_t t_count = 0;
+		//Счетчик каждого элемента в тигеле (для проверки заказа)
+		uint16_t tigel_counter[5] = { 0, 0, 0, 0, 0 };
 
 		//Проверка активности спрайта
 		bool isHovered(const sf::Sprite& sprite);
@@ -36,51 +52,80 @@ class Sigma::Game {
 		//скорость клиента
 		float client_speed = 0.9f;
 
-		//Класс клиента
-		struct Client {
-			int recipe_num = 0;
-			int client_type = 0;
-			bool waiting = false;
-			bool finished = false;
-			sf::Clock clock;
-			Client() {
-				srand(10000);
-				client_type = rand() % 5;
-				clock.restart();
-			}
-		};
+		//время ожидания в мс
+		uint64_t wait_time = 20000;
 
-
+		//структура рецепта, страницы рецептов, книги рецептов
 		struct Recipe {
+			std::string name;
+			std::vector<sf::Sprite> elements; //спрайты элементов
+			uint16_t counter[5] = { 0, 0, 0, 0, 0 }; //счетчик каждого элемента в тигеле
 
 		};
 
-
-		struct RecipesSlider {
-
-
-
+		struct RecipePage
+		{
+			uint16_t max_on_page = 4; 
+			std::vector<Recipe> recipes;
 		};
+
+		struct RecipesBook {
+			sf::Text text[4]; //текст рецепта
+			sf::Sprite plus[4][4]; //спрайты плюсиков+
+			uint16_t page_num = 0; //номер текущей страницы
+
+			std::vector<RecipePage> pages;
+			std::vector<Recipe> recipes_list;
+		};
+
+		//структура клиента
+		struct Client {
+			int recipe_num = 0;		//номер рецепта
+			int client_type = 0;	//тип клиент (цвет)
+			int flask_type = 0;		//тип колбы (зелья)
+			bool waiting = false;	//ождиание
+			bool finished = false;	//закончено
+			sf::Clock clock;
+		};
+		
+		sf::Text client_text;  //текст заказа
+		sf::Text balance_text; //текст счета
+
+		//Области для смены страниц
+		sf::IntRect prev = sf::IntRect(298, 114, 50, 200); 
+		sf::IntRect next = sf::IntRect(510, 114, 100, 200);
 
 		//Таймер паузы (для реализации паузы в игре)
 		sf::Clock pause_clock;
 		uint64_t pause_elapsed = 0;
 
+
+
+
+
+
 		sf::RenderWindow* m_window = nullptr;
 		GameData* m_data = nullptr;		//игровые данные
 		Client* current = nullptr;		//клиент
+		RecipesBook recipe_book;
 		bool* m_pause;					//пауза
 
-		//тайм бар
-		sf::RectangleShape time_bar_hover;
-		sf::RectangleShape time_bar;
 
+		void update_balance(); 
+		void new_client();
+		void finish_the_order( int i);
+		bool load_recipes();
+		void update_recipe_book();
+		void draw_recipe_book();
+		void prev_page();
+		void next_page();
+		
 
 	public:
 		Game(sf::RenderWindow* window, GameData* data, bool* pause);
 		void on_mouse_click(); 
 		void on_keyboard(const sf::Event & event);
-		void load_data();
+		bool load_data();
 		void render();
 		void update();
 

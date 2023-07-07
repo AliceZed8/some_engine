@@ -3,29 +3,34 @@
 #include "game_data.h"
 #include "menu.h"
 
-
 std::ofstream Logger::Log::out;
 
 Sigma::Engine::Engine(const std::string& title, uint16_t w, uint16_t h):
 	m_title(title), m_width(w), m_height(h)
 {
-	//Создание окна, класса игровых данных, класса игры
-	window = new sf::RenderWindow(sf::VideoMode(w, h), m_title, sf::Style::Titlebar | sf::Style::Close);
+	//Создание окна, класса игровых данных
+	window = new sf::RenderWindow(sf::VideoMode(w, h), sf::String(m_title, std::locale("RU_ru")), sf::Style::Titlebar | sf::Style::Close);
 	pause = new bool(true);
 	data = new GameData();
+
+	if ((image.loadFromFile("icon.png")) && (window != nullptr)) {
+		window->setIcon(image.getSize().x, image.getSize().y, image.getPixelsPtr());
+	}
+
+
+	//Загрузка ранее сохраненных данных
+	data->load_data();
+
+	if (data->data == nullptr) {
+		ERROR("Failed to allocate memory for game data class");
+		window->close();
+	}
+
+	//Создание класса игры и меню
 	game = new Game(window, data, pause);
 	menu = new Menu(window, data, pause);
 	
-	//Загрузка ранее сохраненных данных
-	data->load_data();
 	window->setActive();
-
-	//если нет памяти
-	if (data->data == nullptr) {
-		window->close();
-	}
-	
-	
 }
 
 void Sigma::Engine::run() {
@@ -45,13 +50,15 @@ void Sigma::Engine::run() {
 		if (*pause) menu->draw();
 
 		window->display();
+
+
+
 		//Контроль фпс
 		int frame_duration = clock.getElapsedTime().asMilliseconds();
 		int time_to_sleep = int(1000.f / want_fps) - frame_duration;
 		if (time_to_sleep > 0) sf::sleep(sf::milliseconds(time_to_sleep));
 		clock.restart();
 	}
-
 
 	//Сохраняем данные
 	data->save_data();

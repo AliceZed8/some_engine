@@ -32,6 +32,9 @@ target_link_libraries(Some_Game
 						optimized sfml-system-s
 						optimized sfml-audio-s)
 	
-target_link_libraries(Some_Game opengl32 freetype winmm gdi32 openal32 flac vorbisenc vorbisfile vorbis ogg)
+target_link_libraries(Some_Game opengl32 freetype openal32 winmm gdi32 flac vorbisenc vorbisfile vorbis ogg)
 
 file(COPY "assets" DESTINATION "/")
+file(COPY "openal32.dll" DESTINATION "/")
+file(COPY "icon.png" DESTINATION "/")
+

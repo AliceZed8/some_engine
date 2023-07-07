@@ -3,7 +3,7 @@
 int main() {
     Logger::Log::InitLogFile();
 
-    Sigma::Engine engine("Game", 600, 800);
+    Sigma::Engine engine("Лавка Алхимика", 600, 800);
     engine.run();
     return 0;
 }
