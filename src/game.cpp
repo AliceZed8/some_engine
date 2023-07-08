@@ -159,8 +159,8 @@ Sigma::Game::Game(sf::RenderWindow* window, GameData* data, bool* pause) :
 	if (!load_recipes()) m_window->close();
 
 	//Тайм бар и его первоначальные настройки
-	time_bar.setPosition(230, 150);
-	time_bar_hover.setPosition(230, 150);
+	time_bar.setPosition(250, 150);
+	time_bar_hover.setPosition(250, 150);
 	
 	time_bar_hover.setSize(sf::Vector2f(20.0f, 150.0f));
 	time_bar_hover.setFillColor(sf::Color(255, 255, 255));
@@ -172,7 +172,7 @@ Sigma::Game::Game(sf::RenderWindow* window, GameData* data, bool* pause) :
 	//Счет и его первоначальные настройки
 	balance_text.setFont(font);
 	balance_text.setCharacterSize(16);
-	balance_text.setPosition(50, 100);
+	balance_text.setPosition(70, 105);
 
 	//Обновляем счет
 	update_balance();
@@ -191,13 +191,13 @@ void Sigma::Game::new_client() {
 	current->recipe_num = gen() % (recipe_book.recipes_list.size());
 	current->clock.restart();
 
-	time_bar.setPosition(230, 150);
-	time_bar_hover.setPosition(230, 150);
+	time_bar.setPosition(250, 150);
+	time_bar_hover.setPosition(250, 150);
 
 	client_text.setFont(font);
 	client_text.setColor(sf::Color::Black);
-	client_text.setCharacterSize(15);
-	client_text.setPosition(45, 50);
+	client_text.setCharacterSize(16);
+	client_text.setPosition(20, 23);
 
 	std::string str;
 	switch (current->flask_type)
@@ -239,9 +239,9 @@ void Sigma::Game::on_mouse_click() {
 			//Если нажат ингредиент
 			if (isHovered(element_sprites[i])) {
 				
-
 				//Если в тигеле менее 5 ингрелиентов
 				if (elements_in_tigel.size() < 5) {
+					splash_s.play();
 					tigel_counter[i]++;
 					icon_sprites[i].setScale(0.5f, 0.5f);
 					//Расставляем их в порядке
@@ -277,7 +277,6 @@ void Sigma::Game::on_mouse_click() {
 			}
 		}
 
-	
 		if (prev.contains(mouse.getPosition(*m_window).x, mouse.getPosition(*m_window).y)) prev_page();
 		
 		if (next.contains(mouse.getPosition(*m_window).x, mouse.getPosition(*m_window).y)) next_page();
@@ -292,6 +291,17 @@ void Sigma::Game::on_mouse_click() {
 				}
 			}
 		}
+
+		if (isHovered(money_sprite)) {
+			if (money) {
+				take_the_money_s.play();
+				money = false;
+				m_data->data->money += money_count;
+				money_count = 0;
+				update_balance();
+			}
+			
+		}
 		
 	}
 }
@@ -300,6 +310,8 @@ void Sigma::Game::on_mouse_click() {
 void Sigma::Game::finish_the_order(int i) {
 	current->waiting = false;
 	current->finished = true;
+	filling_the_flask_s.play();
+
 	if (i == current->flask_type) {
 		bool test = true;
 		for (int k = 0; k < 5; k++) {
@@ -308,12 +320,10 @@ void Sigma::Game::finish_the_order(int i) {
 		}
 
 		if (test) {
-			std::cout << "OK" << std::endl;
-			m_data->data->money += 1000;
-			update_balance();
+			money_for_order_s.play();
+			money = true;
+			money_count += 500;
 		}
-			
-		else std::cout << "FAIL" << std::endl;
 	}
 
 }
@@ -365,23 +375,31 @@ void Sigma::Game::render() {
 		m_window->draw(client_text);
 	}
 	
-	// Элементы, мини элементы
+	// Элементы
 	for (int i = 0; i < 5; i++) 
 		m_window->draw(element_sprites[i]);
 
+	// мини элементы в тигеле
 	for (int i = 0; i < elements_in_tigel.size(); i++) 
 		m_window->draw(elements_in_tigel[i]);
 
+	//тигель
 	m_window->draw(tigel_sprite);
 
+	//книга рецептов
 	draw_recipe_book();
 
+	//колбы
 	for (int i = 0; i < 3; i++) m_window->draw(flask_sprites[i]);
 
+	//счет
 	m_window->draw(balance_text);
 
 	// Если есть наведенный элемент то рисуем другой его вариант
 	if (hover) m_window->draw(HoveredSprite);
+
+	//деньги
+	if (money) m_window->draw(money_sprite);
 
 }
 
@@ -434,7 +452,7 @@ void Sigma::Game::update() {
 			if (!current->finished) {
 				//Обновляем полоску таймбара
 				time_bar.setPosition(
-					230, 150 + 150.0f * (current->clock.getElapsedTime().asMilliseconds() - pause_elapsed) / wait_time
+					250, 150 + 150.0f * (current->clock.getElapsedTime().asMilliseconds() - pause_elapsed) / wait_time
 				);
 
 				time_bar.setSize(
@@ -533,6 +551,8 @@ bool Sigma::Game::load_data() {
 		if (!plus_texture.loadFromFile("assets/icons/plus.png"))  
 			throw std::exception("Failed to load + texture assets/icons/plus.png");
 
+
+		//Колбы
 		for (int i = 0; i < 3; i++) {
 			if (!flask_textures[i].loadFromFile("assets/flask/" + std::to_string(i + 1) + ".png")) 
 				throw std::exception("Failed to load flask  /assets/flask/");
@@ -545,8 +565,46 @@ bool Sigma::Game::load_data() {
 		flask_sprites[2].setPosition(500, 400);
 
 
+		//Деньги
+
+		if (!money_texture.loadFromFile("assets/money.png"))
+			throw std::exception("Failed to load assets/money.png");
+
+
+		money_sprite.setTexture(money_texture);
+		money_sprite.setScale(0.5f, 0.5f);
+		money_sprite.setPosition(30, 320);
+
+
+
+
+
+		//Звуки
 		if (!walking_sb.loadFromFile("assets/sound/walking.wav"))
 			throw std::exception("Failed to load assets/sound/walking.wav");
+
+		if (!splash_sb.loadFromFile("assets/sound/splash.wav"))
+			throw std::exception("Failed to load assets/sound/splash.wav");
+
+		if (!filling_the_flask_sb.loadFromFile("assets/sound/filling_the_flask.wav"))
+			throw std::exception("Failed to load assets/sound/filling_the_flask.wav");
+
+		if (!money_for_order_sb.loadFromFile("assets/sound/money_for_the_order.ogg"))
+			throw std::exception("Failed to load assets/sound/money_for_the_order.ogg");
+
+		if (!take_the_money_sb.loadFromFile("assets/sound/take_the_money.ogg"))
+			throw std::exception("Failed to load assets/sound/take_the_money.ogg");
+
+
+		filling_the_flask_s.setBuffer(filling_the_flask_sb);
+		filling_the_flask_s.setVolume(20);
+
+		money_for_order_s.setBuffer(money_for_order_sb);
+		take_the_money_s.setBuffer(take_the_money_sb);
+
+		splash_s.setBuffer(splash_sb);
+		splash_s.setVolume(10);
+
 
 		walking_s.setBuffer(walking_sb);
 	}

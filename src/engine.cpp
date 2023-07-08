@@ -86,6 +86,7 @@ void Sigma::Engine::update() {
 		//Keyboard
 		if (event.type == sf::Event::KeyReleased) {
 			game->on_keyboard(event);
+			if (*pause) menu->on_keyboard(event);
 		}
 	}
 }

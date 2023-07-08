@@ -29,11 +29,36 @@ class Sigma::Game {
 		sf::Mouse mouse;						//Мышь
 		sf::Font font;							//Основной шрифт
 
-
+		//Звук ходьбы
 		sf::SoundBuffer walking_sb;
 		sf::Sound walking_s;
 		sf::Clock walk_clock;
 
+		//Звук добавления элемента в тигель
+		sf::SoundBuffer splash_sb;
+		sf::Sound splash_s;
+
+		//Звук наполнения колбы
+		sf::SoundBuffer filling_the_flask_sb;
+		sf::Sound filling_the_flask_s;
+
+		//Звук оплаты клиента
+		sf::SoundBuffer money_for_order_sb;
+		sf::Sound money_for_order_s;
+
+		//Звук подбора денег
+		sf::SoundBuffer take_the_money_sb;
+		sf::Sound take_the_money_s;
+
+
+
+
+
+		//Деньги
+		sf::Texture money_texture;
+		sf::Sprite money_sprite;
+		bool money = false;
+		uint64_t money_count = 0;
 
 
 		//тайм бар
